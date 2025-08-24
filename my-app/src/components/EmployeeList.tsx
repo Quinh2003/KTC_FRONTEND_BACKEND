@@ -1,8 +1,8 @@
 
 import { useEffect, useState } from 'react';
-import { getEmployees, deleteEmployee } from '../api/employeeApi';
-import type { Employee } from '../types/employee';
-import { Pencil, Trash2 } from 'lucide-react';
+import { getEmployeesPaginated, deleteEmployee } from '../api/employeeApi';
+import type { Employee, PaginatedEmployeeResponse } from '../types/employee';
+import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface Props {
   onEdit: (employee: Employee) => void;
@@ -12,24 +12,36 @@ export default function EmployeeList({ onEdit }: Props) {
   const [employees, setEmployees] = useState<Employee[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [page, setPage] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [hasNext, setHasNext] = useState(false);
+  const [hasPrevious, setHasPrevious] = useState(false);
+  const pageSize = 4;
 
-  const fetchData = () => {
+  const fetchData = (pageNum = page) => {
     setLoading(true);
-    getEmployees()
-      .then(setEmployees)
+    getEmployeesPaginated(pageNum, pageSize)
+      .then((res: PaginatedEmployeeResponse) => {
+        setEmployees(res.data);
+        setTotalPages(res.totalPages);
+        setHasNext(res.hasNext);
+        setHasPrevious(res.hasPrevious);
+        setPage(res.pageNumber);
+      })
       .catch(e => setError(e.message))
       .finally(() => setLoading(false));
   };
 
   useEffect(() => {
-    fetchData();
-  }, []);
+    fetchData(page);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [page]);
 
   const handleDelete = async (id: number) => {
     if (!window.confirm('Are you sure you want to delete this employee?')) return;
     try {
       await deleteEmployee(id);
-      fetchData();
+      fetchData(page);
     } catch (e: any) {
       setError(e.message);
     }
@@ -91,6 +103,28 @@ export default function EmployeeList({ onEdit }: Props) {
           ))}
         </tbody>
       </table>
+      {/* Pagination Controls */}
+      <div className="flex justify-center items-center gap-2 mt-4">
+        <button
+          className="px-3 py-1 rounded bg-indigo-100 text-indigo-700 font-semibold disabled:opacity-50 flex items-center justify-center"
+          onClick={() => setPage(page - 1)}
+          disabled={!hasPrevious}
+          aria-label="Previous page"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <span className="mx-2 text-indigo-700 font-bold">
+          Page {page + 1} / {totalPages}
+        </span>
+        <button
+          className="px-3 py-1 rounded bg-indigo-100 text-indigo-700 font-semibold disabled:opacity-50 flex items-center justify-center"
+          onClick={() => setPage(page + 1)}
+          disabled={!hasNext}
+          aria-label="Next page"
+        >
+          <ChevronRight size={20} />
+        </button>
+      </div>
     </div>
   );
 }

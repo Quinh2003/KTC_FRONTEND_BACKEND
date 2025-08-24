@@ -1,3 +1,9 @@
+import type { PaginatedEmployeeResponse } from '../types/employee';
+export async function getEmployeesPaginated(page = 0, size = 4): Promise<PaginatedEmployeeResponse> {
+  const res = await fetch(`${API_URL}?page=${page}&size=${size}`);
+  if (!res.ok) throw new Error('Failed to fetch employees');
+  return res.json();
+}
 
 import type { Employee, EmployeeCreateRequest, EmployeeUpdateRequest } from '../types/employee';
 

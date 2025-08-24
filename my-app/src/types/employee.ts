@@ -1,3 +1,12 @@
+export interface PaginatedEmployeeResponse {
+  data: Employee[];
+  pageNumber: number;
+  pageSize: number;
+  totalRecords: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
 
 export type Gender = 'MALE' | 'FEMALE' | 'OTHER';
 

@@ -1,6 +1,6 @@
 package com.example.demo.controller;
 
-import java.util.List;
+import com.example.demo.dto.PaginatedEmployeeResponseDto;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,8 +37,10 @@ public class EmployeeController {
     }
 
     @GetMapping
-    public ResponseEntity<List<EmployeeDTO>> getAllEmployees() {
-        List<EmployeeDTO> employees = employeeService.getAllEmployees();
+    public ResponseEntity<PaginatedEmployeeResponseDto> getAllEmployees(
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "0") int page,
+            @org.springframework.web.bind.annotation.RequestParam(defaultValue = "4") int size) {
+        PaginatedEmployeeResponseDto employees = employeeService.getAllEmployees(page, size);
         return ResponseEntity.ok(employees);
     }
 

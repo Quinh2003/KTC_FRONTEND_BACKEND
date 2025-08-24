@@ -1,4 +1,7 @@
+
 package com.example.demo.service;
+
+import com.example.demo.dto.PaginatedEmployeeResponseDto;
 
 import com.example.demo.dto.EmployeeCreateRequest;
 import com.example.demo.dto.EmployeeDTO;
@@ -13,7 +16,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 
 @Service
 @RequiredArgsConstructor
@@ -37,11 +42,19 @@ public class EmployeeService {
         return convertToDTO(savedEmployee);
     }
 
-    public List<EmployeeDTO> getAllEmployees() {
-        return employeeRepository.findAll()
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
+    public PaginatedEmployeeResponseDto getAllEmployees(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Employee> employeePage = employeeRepository.findAll(pageable);
+        List<EmployeeDTO> employeeDTOs = employeePage.getContent().stream().map(this::convertToDTO).toList();
+        return PaginatedEmployeeResponseDto.builder()
+                .data(employeeDTOs)
+                .pageNumber(employeePage.getNumber())
+                .pageSize(employeePage.getSize())
+                .totalRecords(employeePage.getTotalElements())
+                .totalPages(employeePage.getTotalPages())
+                .hasNext(employeePage.hasNext())
+                .hasPrevious(employeePage.hasPrevious())
+                .build();
     }
 
     public EmployeeDTO getEmployeeById(Long id) {
