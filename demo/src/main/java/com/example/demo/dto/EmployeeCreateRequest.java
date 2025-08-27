@@ -19,12 +19,12 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class EmployeeCreateRequest {
 
-    @NotBlank
-    @Size(min =2, max = 100)
+    @NotBlank(message = "Full name không được để trống")
+    @Size(min = 2, max = 100, message = "Full name không được để trống")
     private String fullName;
 
-    @NotBlank
-    @Email(message = "Email is not valid")
+    @NotBlank(message = "Email không được để trống")
+    @Email(message = "Email không hợp lệ")
     private String email;
 
     @NotNull
